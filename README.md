@@ -1,0 +1,2 @@
+- added PM2_HOME environment variable to root folder
+- export TZ="Europe/Amsterdam";

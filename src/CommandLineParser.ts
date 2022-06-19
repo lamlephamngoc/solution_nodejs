@@ -15,7 +15,7 @@ class CommandLineParser {
         'Given Date with pattern YYYY-MM-DD example: 2019-10-25'
       );
     program.parse(process.argv);
-    const csvProcessor = new CsvProcessor('../csv/transactions.csv');
+    const csvProcessor = new CsvProcessor('csv/transactions.csv');
     const options = program.opts();
     if (options.token) {
       console.log(`Process the latest portfolio for token ${options.token}`);
@@ -30,8 +30,10 @@ class CommandLineParser {
 
     // console.log(csvProcessor.checkTokenExisting());
     // console.log(csvProcessor.printData());
-    const exchangeRateProcessor = new ExchangeRateProcessor('BTC', false);
-    exchangeRateProcessor.getRateInUSD();
+    // const exchangeRateProcessor = new ExchangeRateProcessor('BTC', false);
+    // exchangeRateProcessor.getRateInUSD();
+
+    csvProcessor.process();
   };
 }
 export default new CommandLineParser();
