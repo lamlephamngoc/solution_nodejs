@@ -59,8 +59,7 @@ class CsvProcessor {
       }
       this.processOnData(record, map);
     }
-
-    new LatestPortfolioPrinter(map, true).print();
+    return map;
   };
 
   processOnData = (record: string, map: Map<string, number[]>) => {

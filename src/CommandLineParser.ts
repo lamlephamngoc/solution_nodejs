@@ -1,12 +1,13 @@
 import CsvProcessor from './CsvProcessor';
 import ExchangeRateProcessor from './ExchangeRateProcessor';
+import LatestPortfolioPrinter from './LatestPortfolioPrinter';
 const {Command} = require('commander');
 const program = new Command();
 
 class CommandLineParser {
   constructor() {}
 
-  start = () => {
+  start = async () => {
     console.log('Start processing CSV file');
     program
       .option(
@@ -38,7 +39,8 @@ class CommandLineParser {
     if (options.test) {
       csvProcessor.testing = options.test;
     }
-    csvProcessor.process();
+    const map = await csvProcessor.process();
+    new LatestPortfolioPrinter(map, options.test).print();
   };
 }
 export default new CommandLineParser();
