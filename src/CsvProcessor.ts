@@ -1,10 +1,12 @@
 const fs = require('fs');
+import LatestPortfolioPrinter from './LatestPortfolioPrinter';
 
 class CsvProcessor {
   private csvFilePath: string;
   token: string | undefined = '';
   fromDate: number | undefined;
   toDate: number | undefined;
+  testing: boolean | undefined;
 
   constructor(csvFilePath: string) {
     this.csvFilePath = csvFilePath;
@@ -40,17 +42,21 @@ class CsvProcessor {
 
   process = () => {
     const map: Map<string, number[]> = new Map();
+    // skip first line
+    let firstLine = true;
     const transactionsStream = fs.createReadStream(this.csvFilePath, 'utf8');
     transactionsStream
-      .on('data', (chunk: any) => {
-        const transactionsConverted = chunk.toString().toUpperCase();
-        // console.log(chunk);
-        transactionsConverted.split('\n').forEach((records: string) => {
+      .on('data', (transactions: any) => {
+        transactions.split('\n').forEach((records: string) => {
+          if (firstLine) {
+            firstLine = false;
+            return;
+          }
           this.processOnData(records, map);
         });
       })
       .on('end', function () {
-        console.log('END map ', map);
+        new LatestPortfolioPrinter(map, true).print();
       })
       .on('error', (err: any) => {
         console.log(err);
@@ -60,15 +66,14 @@ class CsvProcessor {
   processOnData = (records: string, map: Map<string, number[]>) => {
     const record = records.split(',');
     const timestamp = record[0];
-    const transactionDate = new Date(parseInt(timestamp) * 1_000).getTime();
-    if (this.notEqualsGivenDate(transactionDate)) {
-      return;
-    }
     const depositOrWithdrawal = record[1];
     const token = record[2];
     const amount = Number(record[3]);
+    const transactionDate = new Date(parseInt(timestamp) * 1_000).getTime();
+    if (this.notEqualsGivenDate(transactionDate) || undefined === token) {
+      return;
+    }
     let amounts: number[] | undefined = [];
-
     amounts = map.get(token);
     if (undefined !== amounts) {
       amounts.push(this.processAmount(amount, depositOrWithdrawal));

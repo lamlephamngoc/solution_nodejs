@@ -9,6 +9,14 @@ class CommandLineParser {
   start = () => {
     console.log('Start processing CSV file');
     program
+      .option(
+        '--test',
+        `Testing mode: \n
+    given BTC in USD 30,000$
+    given ETH in USD 1,000$
+    given XRP in USD 30,000$
+    '`
+      )
       .option('-t, --token <token>', 'Given Token')
       .option(
         '-d, --date <date>',
@@ -27,12 +35,9 @@ class CommandLineParser {
       );
       csvProcessor.setInputDate(options.date);
     }
-
-    // console.log(csvProcessor.checkTokenExisting());
-    // console.log(csvProcessor.printData());
-    // const exchangeRateProcessor = new ExchangeRateProcessor('BTC', false);
-    // exchangeRateProcessor.getRateInUSD();
-
+    if (options.test) {
+      csvProcessor.testing = options.test;
+    }
     csvProcessor.process();
   };
 }

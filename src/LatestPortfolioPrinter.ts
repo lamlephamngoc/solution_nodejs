@@ -21,11 +21,21 @@ class LatestPortfolioPrinter {
         exchangeRate = 1.0;
       }
       console.log(
-        `${token} value in USD ${
-          exchangeRate! * amounts.reduce((a, b) => a + b, 0)
-        }`
+        `${token} value in USD ${this.roundAmount(
+          exchangeRate,
+          amounts
+        ).toLocaleString()}`
       );
     });
+  };
+
+  roundAmount = (exchangeRate: number, amounts: number[]): number => {
+    return Number(
+      (
+        Math.round(exchangeRate! * amounts.reduce((a, b) => a + b, 0) * 100) /
+        100
+      ).toFixed(3)
+    );
   };
 }
 
