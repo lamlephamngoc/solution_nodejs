@@ -1,4 +1,5 @@
 const fs = require('fs');
+const readline = require('readline');
 import LatestPortfolioPrinter from './LatestPortfolioPrinter';
 
 class CsvProcessor {
@@ -40,35 +41,34 @@ class CsvProcessor {
     return this.token !== null && this.token!.length > 0;
   };
 
-  process = () => {
+  process = async () => {
     const map: Map<string, number[]> = new Map();
     // skip first line
     let firstLine = true;
     const transactionsStream = fs.createReadStream(this.csvFilePath, 'utf8');
-    transactionsStream
-      .on('data', (transactions: any) => {
-        transactions.split('\n').forEach((records: string) => {
-          if (firstLine) {
-            firstLine = false;
-            return;
-          }
-          this.processOnData(records, map);
-        });
-      })
-      .on('end', function () {
-        new LatestPortfolioPrinter(map, true).print();
-      })
-      .on('error', (err: any) => {
-        console.log(err);
-      });
+
+    const rl = readline.createInterface({
+      input: transactionsStream,
+      crlfDelay: Infinity,
+    });
+
+    for await (const record of rl) {
+      if (firstLine) {
+        firstLine = false;
+        continue;
+      }
+      this.processOnData(record, map);
+    }
+
+    new LatestPortfolioPrinter(map, true).print();
   };
 
-  processOnData = (records: string, map: Map<string, number[]>) => {
-    const record = records.split(',');
-    const timestamp = record[0];
-    const depositOrWithdrawal = record[1];
-    const token = record[2];
-    const amount = Number(record[3]);
+  processOnData = (record: string, map: Map<string, number[]>) => {
+    const recordArray = record.split(',');
+    const timestamp = recordArray[0];
+    const depositOrWithdrawal = recordArray[1];
+    const token = recordArray[2];
+    const amount = Number(recordArray[3]);
     const transactionDate = new Date(parseInt(timestamp) * 1_000).getTime();
     if (this.notEqualsGivenDate(transactionDate) || undefined === token) {
       return;
